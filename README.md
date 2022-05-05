@@ -2,7 +2,8 @@
 <h1>
   <code>notionion</code>🧅
 </h1>
-
+  <img src="https://github.com/ariary/notionion/blob/main/img/onion-logo.png"  width=150>
+  
   <strong> Use <a href="https://www.notion.so">Notion</a> as an HTTP proxy.</strong><br>
   <i>🫀Like having Burp in your notetaking app</i>
 </div>
