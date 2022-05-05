@@ -36,6 +36,8 @@ roughly inspired by the great idea of <a href="https://github.com/mttaggart/Offe
 
 <img src="https://github.com/ariary/notionion/blob/main/img/page.png"  width=350>
 
+<sup><i>You can import the template [`./page.html`](https://github.com/ariary/notionion/blob/main/page.html) using the "Import" function of Notion<i></sup>
+
 #### Give the permissions to `notionion` to access the Interception page
 * Go to the [Notion API developer page](https://developers.notion.com/) and log in. Create an Integration user (`New integration`). Copy that user's API key
 * Copy the "Interception page" Url
