@@ -114,6 +114,12 @@ func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi
 		Paragraph: &paragraph.Paragraph,
 	}
 
-	// send append request
+	// send update request
 	return client.Block.Update(context.Background(), requestCodeBlockID, updateReq)
 }
+
+//UpdateResponseContent: update response block
+
+//CheckRequestSendingBox: Check if the to_do block to send request is checked
+
+
