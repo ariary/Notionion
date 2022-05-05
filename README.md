@@ -20,11 +20,11 @@ roughly inspired by the great idea of <a href="https://github.com/mttaggart/Offe
 
 ## Quickstart
 
-**Set-up** ([details]())
+**Set-up**  ([details](#-set-up))
 1. Create the "Interception page" in Notion
 2. Give the permissions to `notionion` to access the Interception page 
 
-**Run** ([details]())
+**Run** ([details](#-run))
 
 3. Perform HTTP request
 4. Modify it trough the "Interception page" in Notion
@@ -36,7 +36,7 @@ roughly inspired by the great idea of <a href="https://github.com/mttaggart/Offe
 
 <img src="https://github.com/ariary/notionion/blob/main/img/page.png"  width=350>
 
-<sup><i>You can import the template [`./page.html`](https://github.com/ariary/notionion/blob/main/page.html) using the "Import" function of Notion<i></sup>
+<sup><i>You can import the template [`./page.html`](https://github.com/ariary/notionion/blob/main/page.html) using the "Import" function of Notion</i></sup>
 
 #### Give the permissions to `notionion` to access the Interception page
 * Go to the [Notion API developer page](https://developers.notion.com/) and log in. Create an Integration user (`New integration`). Copy that user's API key
@@ -44,9 +44,12 @@ roughly inspired by the great idea of <a href="https://github.com/mttaggart/Offe
   * In browser: only copy the URL
   * On desktop app: `CTRL+L`
 * Add your Notion Developer API account to this page (In the upper-right corner of your Notion page, click ***"Share"*** and ***"Invite"***)
-* Install `notionion`:
-  * `git clone https://github.com/ariary/notionion && make before.build && make build.notion` *(need `go`)*
-  * `go install github.com/ariary/notionion@latest`
-  * `curl -lO -L https://github.com/ariary/notionion/releases/latest/download/notionion && chmod +x notionion`
+* Install `notionion` [see](#install)
 
 ### 👟 Run
+
+
+## Install
+* **From release**: `curl -lO -L https://github.com/ariary/notionion/releases/latest/download/notionion && chmod +x notionion`
+* **Build it**: `git clone https://github.com/ariary/notionion && make before.build && make build.notion` *(need `go`)*
+* **with `go`**:`go install github.com/ariary/notionion@latest`
