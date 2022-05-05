@@ -45,7 +45,7 @@ roughly inspired by the great idea of <a href="https://github.com/mttaggart/Offe
   * On desktop app: `CTRL+L`
 * Add your Notion Developer API account to this page (In the upper-right corner of your Notion page, click ***"Share"*** and ***"Invite"***)
 * Install `notionion`:
-  * `git clone https://github.com/ariary/notionion && make build.notion` *(need `go`)*
+  * `git clone https://github.com/ariary/notionion && make before.build && make build.notion` *(need `go`)*
   * `go install github.com/ariary/notionion@latest`
   * `curl -lO -L https://github.com/ariary/notionion/releases/latest/download/notionion && chmod +x notionion`
 
