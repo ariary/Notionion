@@ -15,30 +15,23 @@ func main() {
 		fmt.Println("❌ Please set NOTION_TOKEN envvar with your integration token before launching notionion")
 		os.Exit(92)
 	}
+	// page id
 	pageid := os.Getenv("NOTION_PAGEID")
 	if pageid == "" {
 		fmt.Println("❌ Please set NOTION_PAGEID envvar with your page id before launching notionion (CTRL+L on desktop app)")
 		os.Exit(92)
 	}
 
+	// Check page content
 	client := notionapi.NewClient(notionapi.Token(token))
-	// page, err := client.Page.Get(context.Background(), notionapi.PageID(pageid))
-	// if err != nil {
-	// 	fmt.Println("failed retrieving page:", pageid)
-	// 	os.Exit(92)
-	// }
 
-	// children, err := notionion.GetProxyPageChildren(client, pageid)
-	// if err != nil {
-	// 	fmt.Println("Failed retrieving page children blocks:", err)
-	// 	os.Exit(92)
-	// }
-
-	active, err := notionion.GetProxyStatus(client, pageid)
+	children, err := notionion.RequestProxyPageChildren(client, pageid)
 	if err != nil {
-		fmt.Println("Failed retrieving proxy status")
+		fmt.Println("Failed retrieving page children blocks:", err)
 		os.Exit(92)
 	}
+
+	active := notionion.GetProxyStatus(children)
 
 	if active {
 		fmt.Println("📶 Proxy is active")
@@ -46,13 +39,28 @@ func main() {
 		fmt.Println("📴 Proxy is inactive. Activate it by checking the \"OFF\" box")
 	}
 
-	// for i := 0; i < len(children); i++ {
-	// 	c, err := client.Block.Get(context.Background(), children[i].GetID())
-	// 	if err != nil {
-	// 		fmt.Println("tttt")
-	// 	}
-	// 	fmt.Printf("%+v", c)
-	// 	fmt.Println()
-	// }
+	requestBlock := notionion.GetRequestBlock(children)
+
+	if requestBlock.ID != "" {
+		fmt.Println("➡️ Request block found")
+	} else {
+		fmt.Println("❌ Request block not found in the proxy page")
+	}
+	responselock := notionion.GetResponseBlock(children)
+	if responselock.ID != "" {
+		fmt.Println("⬅️ Response block found")
+	} else {
+		fmt.Println("❌ Response block not found in the proxy page")
+	}
+
+	paragraphReq := notionion.GetRequestParagraphBlock(children)
+	if paragraphReq.ID == "" {
+		fmt.Println("Failed retrieving request paragraph")
+	}
+
+	_, err = notionion.UpdateRequestContent(client, paragraphReq.ID, "this is a test")
+	if err != nil {
+		fmt.Println(err)
+	}
 
 }
