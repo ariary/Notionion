@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 
 	"github.com/ariary/notionion/pkg/notionion"
+	"github.com/elazarl/goproxy"
 	"github.com/jomei/notionapi"
 )
 
@@ -36,10 +39,6 @@ func main() {
 		fmt.Println("Failed retrieving page children blocks:", err)
 		os.Exit(92)
 	}
-	// for i := 0; i < len(children); i++ {
-	// 	fmt.Printf("%+v", children[i])
-	// 	fmt.Println("\n")
-	// }
 
 	if active, err := notionion.GetProxyStatus(children); err != nil {
 		fmt.Println(err)
@@ -57,24 +56,68 @@ func main() {
 		fmt.Println("📨 Forward request")
 	}
 
+	// Request section checks
 	if _, err := notionion.GetRequestBlock(children); err != nil {
 		fmt.Println("❌ Request block not found in the proxy page")
 		fmt.Println(err)
+		os.Exit(92)
 	} else {
 		fmt.Println("➡️ Request block found")
 	}
 
+	codeReq, err := notionion.GetRequestCodeBlock(children)
+	if err != nil {
+		fmt.Println("❌ Request code block not found in the proxy page")
+		fmt.Println(err)
+		os.Exit(92)
+	}
+
+	// Response section checks
+
 	if _, err := notionion.GetResponseBlock(children); err != nil {
 		fmt.Println("❌ Response block not found in the proxy page")
 		fmt.Println(err)
+		os.Exit(92)
 	} else {
 		fmt.Println("⬅️ Response block found")
 	}
 
-<<<<<<< HEAD
+	codeRes, err := notionion.GetResponseCodeBlock(children)
+	if err != nil {
+		fmt.Println("❌ Response code block not found in the proxy page")
+		fmt.Println(err)
+		os.Exit(92)
+	}
+
+	proxy := goproxy.NewProxyHttpServer()
+	//proxy.Verbose = true
+
+	// Request Handler
+	proxy.OnRequest().DoFunc(
+		func(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
+			fmt.Println("Youhou")
+			if active, err := notionion.RequestProxyStatus(client, pageid); err != nil {
+				fmt.Println(err)
+				return r, nil
+			} else if active {
+				// Print request on Notion proxy page
+				notionion.UpdateCodeContent(client, codeReq.ID, r.Host) //todo: request to string and string -> request
+				//wait for action (forward or drop)
+				action := notionion.WaitAction()
+				notionion.UpdateCodeContent(client, codeRes.ID, r.Host) //todo: request to string and string -> request
+				switch action {
+				case notionion.FORWARD:
+					//todo: retrieve code content -> to string
+					return r, nil
+				case notionion.DROP:
+					return nil, nil
+				}
+			}
+			return r, nil
+		})
+	fmt.Println("🧅 Launch notionion proxy !")
+	log.Fatal(http.ListenAndServe(":8080", proxy))
 	// //CODEBLOCK UPDATE
-=======
->>>>>>> ab0c8be0cf88108dad34102676770b2a21744fcf
 	// codeRes, err := notionion.GetResponseCodeBlock(children)
 	// if err != nil {
 	// 	fmt.Println(err)
@@ -85,22 +128,16 @@ func main() {
 	// 	fmt.Println(err)
 	// }
 
-<<<<<<< HEAD
 	//BUTTON DISABLING
-=======
->>>>>>> ab0c8be0cf88108dad34102676770b2a21744fcf
-	_, err = notionion.GetRequestButtonsColumnBlock(children)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// _, err = notionion.GetRequestButtonsColumnBlock(children)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 
-	if err := notionion.DisableRequestButtons(client, pageid); err != nil {
-		fmt.Println(err)
-	}
-<<<<<<< HEAD
+	// if err := notionion.DisableRequestButtons(client, pageid); err != nil {
+	// 	fmt.Println(err)
+	// }
 	// button, _ := notionion.RequestRequestButtonByName(client, pageid, notionion.FORWARD)
 	// fmt.Printf("%+v", button.ToDo.RichText[0].Annotations)
-=======
->>>>>>> ab0c8be0cf88108dad34102676770b2a21744fcf
 
 }

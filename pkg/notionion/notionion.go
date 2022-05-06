@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jomei/notionapi"
 )
 
 const FORWARD = "FORWARD"
 const DROP = "DROP"
+const ON = "ON"
 
 //RequestProxyPageChildren: Returns the children block of the Listener page
 func RequestProxyPageChildren(client *notionapi.Client, pageid string) (childrenBlocks notionapi.Blocks, err error) {
@@ -26,7 +28,7 @@ func RequestProxyStatus(client *notionapi.Client, pageid string) (active bool, e
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "to_do" {
 			todo := children[i].(*notionapi.ToDoBlock).ToDo
-			if todo.RichText[0].Text.Content == "OFF" {
+			if todo.RichText[0].Text.Content == ON {
 				return todo.Checked, err
 			}
 		}
@@ -39,7 +41,7 @@ func GetProxyStatus(children notionapi.Blocks) (bool, error) {
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "to_do" {
 			todo := children[i].(*notionapi.ToDoBlock).ToDo
-			if todo.RichText[0].Text.Content == "ON" {
+			if todo.RichText[0].Text.Content == ON {
 				return todo.Checked, nil
 			}
 		}
@@ -277,4 +279,10 @@ func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 	}
 
 	return err
+}
+
+//WaitAction: waiting for the user check neither FORWARD or DROP
+func WaitAction() string {
+	time.Sleep(3 * time.Second)
+	return FORWARD
 }
