@@ -34,7 +34,7 @@ roughly inspired by the great idea of <a href="https://github.com/mttaggart/Offe
 
 #### Create the "Interception page" in Notion
 
-<img src="https://github.com/ariary/Notionion/blob/main/img/page.png"  width=350>
+<img src="https://github.com/ariary/Notionion/blob/main/img/proxy-page.png"  width=500>
 
 <sup><i>You can import the template [`./page.html`](https://github.com/ariary/Notionion/blob/main/page.html) using the "Import" function of Notion</i></sup>
 
