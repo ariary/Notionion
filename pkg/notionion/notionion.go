@@ -69,28 +69,28 @@ func GetResponseBlock(children notionapi.Blocks) (requestBlock notionapi.Heading
 	return requestBlock
 }
 
-func GetRequestParagraphBlock(children notionapi.Blocks) (requestParagraphBlock notionapi.ParagraphBlock) {
+//GetRequestCodeBlock: Obtain the code block object under the request heading
+func GetRequestCodeBlock(children notionapi.Blocks) (requestCodeBlock notionapi.CodeBlock) {
 	for i := 0; i < len(children); i++ {
-		if children[i].GetType() == "paragraph" {
-			paragraphBlock := children[i].(*notionapi.ParagraphBlock)
+		if children[i].GetType() == "code" {
+			codeBlock := children[i].(*notionapi.CodeBlock)
 			if i > 0 {
 				if children[i-1].GetType() == "heading_2" {
 					above := children[i-1].(*notionapi.Heading2Block)
 					if strings.Contains(above.Heading2.RichText[0].Text.Content, "Request") {
-						return *paragraphBlock
+						return *codeBlock
 					}
 				}
 			}
 		}
 	}
-	return requestParagraphBlock
+	return requestCodeBlock
 }
 
-//UpdateRequestContent: update text in paragraph block within request section
 func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi.BlockID, request string) (notionapi.Block, error) {
-	//construct paragraph block containing request
-	paragraph := notionapi.ParagraphBlock{
-		Paragraph: notionapi.Paragraph{
+	//construct code block containing request
+	paragraph := notionapi.CodeBlock{
+		Code: notionapi.Code{
 			RichText: []notionapi.RichText{
 				{
 					Type: notionapi.ObjectTypeText,
@@ -98,23 +98,24 @@ func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi
 						Content: request,
 					},
 					Annotations: &notionapi.Annotations{
-						Bold:          true,
+						Bold:          false,
 						Italic:        false,
 						Strikethrough: false,
 						Underline:     false,
-						Code:          true,
+						Code:          false,
 						Color:         "",
 					},
 				},
 			},
+			Language: "html",
 		},
-	}
-	//AppendBlockChildrenRequest
-	updateReq := &notionapi.BlockUpdateRequest{
-		Paragraph: &paragraph.Paragraph,
 	}
 
 	// send update request
+	updateReq := &notionapi.BlockUpdateRequest{
+		Code: &paragraph.Code,
+	}
+
 	return client.Block.Update(context.Background(), requestCodeBlockID, updateReq)
 }
 
@@ -122,4 +123,51 @@ func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi
 
 //CheckRequestSendingBox: Check if the to_do block to send request is checked
 
+// func GetRequestParagraphBlock(children notionapi.Blocks) (requestParagraphBlock notionapi.ParagraphBlock) {
+// 	for i := 0; i < len(children); i++ {
+// 		if children[i].GetType() == "paragraph" {
+// 			paragraphBlock := children[i].(*notionapi.ParagraphBlock)
+// 			if i > 0 {
+// 				if children[i-1].GetType() == "heading_2" {
+// 					above := children[i-1].(*notionapi.Heading2Block)
+// 					if strings.Contains(above.Heading2.RichText[0].Text.Content, "Request") {
+// 						return *paragraphBlock
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return requestParagraphBlock
+// }
 
+//UpdateRequestContent: update text in paragraph block within request section
+// func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi.BlockID, request string) (notionapi.Block, error) {
+// 	//construct paragraph block containing request
+// 	paragraph := notionapi.ParagraphBlock{
+// 		Paragraph: notionapi.Paragraph{
+// 			RichText: []notionapi.RichText{
+// 				{
+// 					Type: notionapi.ObjectTypeText,
+// 					Text: notionapi.Text{
+// 						Content: request,
+// 					},
+// 					Annotations: &notionapi.Annotations{
+// 						Bold:          true,
+// 						Italic:        false,
+// 						Strikethrough: false,
+// 						Underline:     false,
+// 						Code:          true,
+// 						Color:         "",
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	//AppendBlockChildrenRequest
+// 	updateReq := &notionapi.BlockUpdateRequest{
+// 		Paragraph: &paragraph.Paragraph,
+// 	}
+
+// 	// send update request
+// 	return client.Block.Update(context.Background(), requestCodeBlockID, updateReq)
+// }

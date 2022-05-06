@@ -53,12 +53,22 @@ func main() {
 		fmt.Println("❌ Response block not found in the proxy page")
 	}
 
-	paragraphReq := notionion.GetRequestParagraphBlock(children)
-	if paragraphReq.ID == "" {
+	// paragraphReq := notionion.GetRequestParagraphBlock(children)
+	// if paragraphReq.ID == "" {
+	// 	fmt.Println("Failed retrieving request paragraph")
+	// }
+
+	// _, err = notionion.UpdateRequestContent(client, paragraphReq.ID, "this is a test")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	codeReq := notionion.GetRequestCodeBlock(children)
+	if codeReq.ID == "" {
 		fmt.Println("Failed retrieving request paragraph")
 	}
 
-	_, err = notionion.UpdateRequestContent(client, paragraphReq.ID, "this is a test")
+	_, err = notionion.UpdateRequestContent(client, codeReq.ID, "this is a test")
 	if err != nil {
 		fmt.Println(err)
 	}
