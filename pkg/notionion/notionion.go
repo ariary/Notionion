@@ -8,6 +8,9 @@ import (
 	"github.com/jomei/notionapi"
 )
 
+const FORWARD = "FORWARD"
+const DROP = "DROP"
+
 //RequestProxyPageChildren: Returns the children block of the Listener page
 func RequestProxyPageChildren(client *notionapi.Client, pageid string) (childrenBlocks notionapi.Blocks, err error) {
 	children, err := client.Block.GetChildren(context.Background(), notionapi.BlockID(pageid), nil)
@@ -149,98 +152,129 @@ func GetRequestButtonsColumnBlock(children notionapi.Blocks) (buttonsBlock notio
 	return buttonsBlock, err
 }
 
-//RequestRequestButtonStatusByName: check if specific to_do block within "request" block is checked.
+//RequestRequestButtonByName:return specific to_do block within "request" block is checked.
 // name: {"FORWARD", "DROP"}
-func RequestRequestButtonStatusByName(client *notionapi.Client, pageid string, name string) (checked bool, err error) {
+func RequestRequestButtonByName(client *notionapi.Client, pageid string, name string) (button notionapi.ToDoBlock, err error) {
 	children, err := RequestProxyPageChildren(client, pageid)
 	if err != nil {
-		return false, err
+		return button, err
 	}
 	buttonsBlock, err := GetRequestButtonsColumnBlock(children)
 	if err != nil {
-		return false, err
+		return button, err
 	}
 
 	columnsList, err := client.Block.GetChildren(context.Background(), buttonsBlock.ID, nil)
 	if err != nil {
-		return false, err
+		return button, err
 	}
 	columns := columnsList.Results
 	for i := 0; i < len(columns); i++ {
 		buttonsList, err := client.Block.GetChildren(context.Background(), columns[i].GetID(), nil)
 		if err != nil {
-			return false, err
+			return button, err
 		}
 
 		for j := 0; j < len(buttonsList.Results); j++ {
 			if buttonsList.Results[j].GetType() == "to_do" {
-				todo := buttonsList.Results[j].(*notionapi.ToDoBlock).ToDo
-				if todo.RichText[0].Text.Content == name {
-					return todo.Checked, err
+				todo := buttonsList.Results[j].(*notionapi.ToDoBlock)
+				if todo.ToDo.RichText[0].Text.Content == name {
+					return *todo, err
 				}
 			}
 		}
 	}
 
-	return false, err
+	return button, err
+}
+
+//RequestForwardButtonStatus: check if forward button is checked
+func RequestForwardButtonStatus(client *notionapi.Client, pageid string) (checked bool, err error) {
+	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
+	if err != nil {
+		return false, err
+	}
+
+	return forward.ToDo.Checked, err
+}
+
+//RequestDropButtonStatus: check if drop button is checked
+func RequestDropButtonStatus(client *notionapi.Client, pageid string) (checked bool, err error) {
+	drop, err := RequestRequestButtonByName(client, pageid, DROP)
+	if err != nil {
+		return false, err
+	}
+
+	return drop.ToDo.Checked, err
 }
 
 func DisableRequestButtons(client *notionapi.Client, pageid string) error {
-	forward, err := RequestRequestButtonStatusByName(client, pageid, "FORWARD")
+	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
 	if err != nil {
 		return err
 	}
 
-	//make function requestbutton return button
-	//getstatus use this function and chech "checked" status
-	return nil
+	drop, err := RequestRequestButtonByName(client, pageid, DROP)
+	if err != nil {
+		return err
+	}
+
+	newForward := notionapi.ToDoBlock{
+		ToDo: notionapi.ToDo{
+			RichText: []notionapi.RichText{
+				{
+					Type: notionapi.ObjectTypeText,
+					Text: notionapi.Text{
+						Content: FORWARD,
+					},
+					Annotations: &notionapi.Annotations{
+						Bold:          false,
+						Italic:        true,
+						Strikethrough: false,
+						Underline:     false,
+						Code:          false,
+						Color:         "gray_background",
+					},
+				},
+			},
+		},
+	}
+
+	newDrop := notionapi.ToDoBlock{
+		ToDo: notionapi.ToDo{
+			RichText: []notionapi.RichText{
+				{
+					Type: notionapi.ObjectTypeText,
+					Text: notionapi.Text{
+						Content: DROP,
+					},
+					Annotations: &notionapi.Annotations{
+						Bold:          false,
+						Italic:        true,
+						Strikethrough: false,
+						Underline:     false,
+						Code:          false,
+						Color:         "gray_background",
+					},
+				},
+			},
+		},
+	}
+
+	// send update requests
+	updateForwardReq := &notionapi.BlockUpdateRequest{
+		ToDo: &newForward.ToDo,
+	}
+	if _, err := client.Block.Update(context.Background(), forward.ID, updateForwardReq); err != nil {
+		return err
+	}
+
+	updateDropReq := &notionapi.BlockUpdateRequest{
+		ToDo: &newDrop.ToDo,
+	}
+	if _, err := client.Block.Update(context.Background(), drop.ID, updateDropReq); err != nil {
+		return err
+	}
+
+	return err
 }
-
-// func GetRequestParagraphBlock(children notionapi.Blocks) (requestParagraphBlock notionapi.ParagraphBlock) {
-// 	for i := 0; i < len(children); i++ {
-// 		if children[i].GetType() == "paragraph" {
-// 			paragraphBlock := children[i].(*notionapi.ParagraphBlock)
-// 			if i > 0 {
-// 				if children[i-1].GetType() == "heading_2" {
-// 					above := children[i-1].(*notionapi.Heading2Block)
-// 					if strings.Contains(above.Heading2.RichText[0].Text.Content, "Request") {
-// 						return *paragraphBlock
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return requestParagraphBlock
-// }
-
-//UpdateRequestContent: update text in paragraph block within request section
-// func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi.BlockID, request string) (notionapi.Block, error) {
-// 	//construct paragraph block containing request
-// 	paragraph := notionapi.ParagraphBlock{
-// 		Paragraph: notionapi.Paragraph{
-// 			RichText: []notionapi.RichText{
-// 				{
-// 					Type: notionapi.ObjectTypeText,
-// 					Text: notionapi.Text{
-// 						Content: request,
-// 					},
-// 					Annotations: &notionapi.Annotations{
-// 						Bold:          true,
-// 						Italic:        false,
-// 						Strikethrough: false,
-// 						Underline:     false,
-// 						Code:          true,
-// 						Color:         "",
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
-// 	//AppendBlockChildrenRequest
-// 	updateReq := &notionapi.BlockUpdateRequest{
-// 		Paragraph: &paragraph.Paragraph,
-// 	}
-
-// 	// send update request
-// 	return client.Block.Update(context.Background(), requestCodeBlockID, updateReq)
-// }
