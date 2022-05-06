@@ -89,7 +89,7 @@ func GetRequestCodeBlock(children notionapi.Blocks) (requestCodeBlock notionapi.
 
 func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi.BlockID, request string) (notionapi.Block, error) {
 	//construct code block containing request
-	paragraph := notionapi.CodeBlock{
+	code := notionapi.CodeBlock{
 		Code: notionapi.Code{
 			RichText: []notionapi.RichText{
 				{
@@ -113,7 +113,7 @@ func UpdateRequestContent(client *notionapi.Client, requestCodeBlockID notionapi
 
 	// send update request
 	updateReq := &notionapi.BlockUpdateRequest{
-		Code: &paragraph.Code,
+		Code: &code.Code,
 	}
 
 	return client.Block.Update(context.Background(), requestCodeBlockID, updateReq)

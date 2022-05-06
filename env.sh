@@ -4,7 +4,7 @@ echo -n "Enter integration token: "
 read -s token
 echo
 echo -n "Enter notion page id: "
-read pageid
+read pageurl
 
 export NOTION_TOKEN="$token"
-export NOTION_PAGEID="$pageid"
+export NOTION_PAGEURL="$pageurl"

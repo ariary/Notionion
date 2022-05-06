@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ariary/notionion/pkg/notionion"
 	"github.com/jomei/notionapi"
@@ -16,10 +17,15 @@ func main() {
 		os.Exit(92)
 	}
 	// page id
-	pageid := os.Getenv("NOTION_PAGEID")
-	if pageid == "" {
-		fmt.Println("❌ Please set NOTION_PAGEID envvar with your page id before launching notionion (CTRL+L on desktop app)")
+	pageurl := os.Getenv("NOTION_PAGE_URL")
+	if pageurl == "" {
+		fmt.Println("❌ Please set NOTION_PAGE_URL envvar with your page id before launching notionion (CTRL+L on desktop app)")
 		os.Exit(92)
+	}
+
+	pageid := pageurl[strings.LastIndex(pageurl, "-")+1:]
+	if pageid == pageurl {
+		fmt.Println("❌ PAGEID was not found in NOTION_PAGEURL. Ensure the url is in the form of https://notion.so/[pagename]-[pageid]")
 	}
 
 	// Check page content
