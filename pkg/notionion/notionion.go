@@ -149,47 +149,67 @@ func GetRequestButtonsColumnBlock(children notionapi.Blocks) (buttonsBlock notio
 	return buttonsBlock, err
 }
 
-//RequestRequestButtonStatusByName: check if specific to_do block within "request" block is checked.
+//RequestRequestButtonByName:return specific to_do block within "request" block is checked.
 // name: {"FORWARD", "DROP"}
-func RequestRequestButtonStatusByName(client *notionapi.Client, pageid string, name string) (checked bool, err error) {
+func RequestRequestButtonByName(client *notionapi.Client, pageid string, name string) (button notionapi.ToDo, err error) {
 	children, err := RequestProxyPageChildren(client, pageid)
 	if err != nil {
-		return false, err
+		return button, err
 	}
 	buttonsBlock, err := GetRequestButtonsColumnBlock(children)
 	if err != nil {
-		return false, err
+		return button, err
 	}
 
 	columnsList, err := client.Block.GetChildren(context.Background(), buttonsBlock.ID, nil)
 	if err != nil {
-		return false, err
+		return button, err
 	}
 	columns := columnsList.Results
 	for i := 0; i < len(columns); i++ {
 		buttonsList, err := client.Block.GetChildren(context.Background(), columns[i].GetID(), nil)
 		if err != nil {
-			return false, err
+			return button, err
 		}
 
 		for j := 0; j < len(buttonsList.Results); j++ {
 			if buttonsList.Results[j].GetType() == "to_do" {
 				todo := buttonsList.Results[j].(*notionapi.ToDoBlock).ToDo
 				if todo.RichText[0].Text.Content == name {
-					return todo.Checked, err
+					return todo, err
 				}
 			}
 		}
 	}
 
-	return false, err
+	return button, err
+}
+
+//RequestForwardButtonStatus: check if forward button is checked
+func RequestForwardButtonStatus(client *notionapi.Client, pageid string) (checked bool, err error) {
+	forward, err := RequestRequestButtonByName(client, pageid, "FORWARD")
+	if err != nil {
+		return false, err
+	}
+
+	return forward.Checked, err
+}
+
+//RequestDropButtonStatus: check if drop button is checked
+func RequestDropButtonStatus(client *notionapi.Client, pageid string) (checked bool, err error) {
+	drop, err := RequestRequestButtonByName(client, pageid, "DROP")
+	if err != nil {
+		return false, err
+	}
+
+	return drop.Checked, err
 }
 
 func DisableRequestButtons(client *notionapi.Client, pageid string) error {
-	forward, err := RequestRequestButtonStatusByName(client, pageid, "FORWARD")
-	if err != nil {
-		return err
-	}
+	// forward, err := RequestRequestButtonByName(client, pageid, "FORWARD")
+	// if err != nil {
+	// 	return err
+	// }
 
 	//make function requestbutton return button
 	//getstatus use this function and chech "checked" status

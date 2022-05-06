@@ -36,46 +36,57 @@ func main() {
 		fmt.Println("Failed retrieving page children blocks:", err)
 		os.Exit(92)
 	}
+	// for i := 0; i < len(children); i++ {
+	// 	fmt.Printf("%+v", children[i])
+	// 	fmt.Println("\n")
+	// }
 
-	active := notionion.GetProxyStatus(children)
-
-	if active {
+	if active, err := notionion.GetProxyStatus(children); err != nil {
+		fmt.Println(err)
+	} else if active {
 		fmt.Println("📶 Proxy is active")
 	} else {
 		fmt.Println("📴 Proxy is inactive. Activate it by checking the \"OFF\" box")
 	}
 
-	requestBlock := notionion.GetRequestBlock(children)
+	forward, err := notionion.RequestForwardButtonStatus(client, pageid)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if forward {
+		fmt.Println("📨 Forward request")
+	}
 
-	if requestBlock.ID != "" {
-		fmt.Println("➡️ Request block found")
-	} else {
+	if _, err := notionion.GetRequestBlock(children); err != nil {
 		fmt.Println("❌ Request block not found in the proxy page")
-	}
-	responselock := notionion.GetResponseBlock(children)
-	if responselock.ID != "" {
-		fmt.Println("⬅️ Response block found")
+		fmt.Println(err)
 	} else {
-		fmt.Println("❌ Response block not found in the proxy page")
+		fmt.Println("➡️ Request block found")
 	}
 
-	// paragraphReq := notionion.GetRequestParagraphBlock(children)
-	// if paragraphReq.ID == "" {
-	// 	fmt.Println("Failed retrieving request paragraph")
-	// }
+	if _, err := notionion.GetResponseBlock(children); err != nil {
+		fmt.Println("❌ Response block not found in the proxy page")
+		fmt.Println(err)
+	} else {
+		fmt.Println("⬅️ Response block found")
+	}
 
-	// _, err = notionion.UpdateRequestContent(client, paragraphReq.ID, "this is a test")
+	// codeRes, err := notionion.GetResponseCodeBlock(children)
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
 
-	codeReq := notionion.GetRequestCodeBlock(children)
-	if codeReq.ID == "" {
-		fmt.Println("Failed retrieving request paragraph")
+	// _, err = notionion.UpdateCodeContent(client, codeRes.ID, "this is a test")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	_, err = notionion.GetRequestButtonsColumnBlock(children)
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	_, err = notionion.UpdateRequestContent(client, codeReq.ID, "this is a test")
-	if err != nil {
+	if err := notionion.DisableRequestButtons(client, pageid); err != nil {
 		fmt.Println(err)
 	}
 
