@@ -71,7 +71,10 @@ func main() {
 		fmt.Println("⬅️ Response block found")
 	}
 
+<<<<<<< HEAD
 	// //CODEBLOCK UPDATE
+=======
+>>>>>>> ab0c8be0cf88108dad34102676770b2a21744fcf
 	// codeRes, err := notionion.GetResponseCodeBlock(children)
 	// if err != nil {
 	// 	fmt.Println(err)
@@ -82,7 +85,10 @@ func main() {
 	// 	fmt.Println(err)
 	// }
 
+<<<<<<< HEAD
 	//BUTTON DISABLING
+=======
+>>>>>>> ab0c8be0cf88108dad34102676770b2a21744fcf
 	_, err = notionion.GetRequestButtonsColumnBlock(children)
 	if err != nil {
 		fmt.Println(err)
@@ -91,7 +97,10 @@ func main() {
 	if err := notionion.DisableRequestButtons(client, pageid); err != nil {
 		fmt.Println(err)
 	}
+<<<<<<< HEAD
 	// button, _ := notionion.RequestRequestButtonByName(client, pageid, notionion.FORWARD)
 	// fmt.Printf("%+v", button.ToDo.RichText[0].Annotations)
+=======
+>>>>>>> ab0c8be0cf88108dad34102676770b2a21744fcf
 
 }
