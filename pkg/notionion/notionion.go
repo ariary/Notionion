@@ -210,6 +210,37 @@ func RequestDropButtonStatus(client *notionapi.Client, pageid string) (checked b
 	return drop.ToDo.Checked, err
 }
 
+//ChangeRequestButton: change request buttons appearance 
+func ChangeRequestButtons(client *notionapi.Client, pageid string,nForward notionapi.ToDoBlock,nDrop notionapi.ToDoBlock) error {
+	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
+	if err != nil {
+		return err
+	}
+
+	drop, err := RequestRequestButtonByName(client, pageid, DROP)
+	if err != nil {
+		return err
+	}
+
+	// send update requests
+	updateForwardReq := &notionapi.BlockUpdateRequest{
+		ToDo: &nForward.ToDo,
+	}
+	if _, err := client.Block.Update(context.Background(), forward.ID, updateForwardReq); err != nil {
+		return err
+	}
+
+	updateDropReq := &notionapi.BlockUpdateRequest{
+		ToDo: &nDrop.ToDo,
+	}
+	if _, err := client.Block.Update(context.Background(), drop.ID, updateDropReq); err != nil {
+		return err
+	}
+
+	return err
+}
+
+//DisableRequestButtons: print request buttons as disabled 
 func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
 	if err != nil {
@@ -279,6 +310,56 @@ func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 	}
 
 	return err
+}
+
+//EnableRequestButtons: print request buttons as disabled 
+func EnableRequestButtons(client *notionapi.Client, pageid string) error {
+
+	newForward := notionapi.ToDoBlock{
+		ToDo: notionapi.ToDo{
+			RichText: []notionapi.RichText{
+				{
+					Type: notionapi.ObjectTypeText,
+					Text: notionapi.Text{
+						Content: FORWARD,
+					},
+					Annotations: &notionapi.Annotations{
+						Bold:          true,
+						Italic:        False,
+						Strikethrough: false,
+						Underline:     false,
+						Code:          false,
+						Color:         "blue",
+					},
+				},
+			},
+		},
+	}
+
+	newDrop := notionapi.ToDoBlock{
+		ToDo: notionapi.ToDo{
+			RichText: []notionapi.RichText{
+				{
+					Type: notionapi.ObjectTypeText,
+					Text: notionapi.Text{
+						Content: DROP,
+					},
+					Annotations: &notionapi.Annotations{
+						Bold:          true,
+						Italic:        false,
+						Strikethrough: false,
+						Underline:     false,
+						Code:          false,
+						Color:         "blue",
+					},
+				},
+			},
+		},
+	}
+
+	
+
+	return ChangeRequestButtons(client, pageid,nForward,nDrop)
 }
 
 //WaitAction: waiting for the user check neither FORWARD or DROP
