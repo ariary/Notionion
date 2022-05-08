@@ -1,6 +1,6 @@
 <div align="center">
 <h1>
-  <code>notionion</code>🧅
+  <code>notionion</code> 🧅
 </h1>
   <img src="https://github.com/ariary/notionion/blob/main/img/onion-logo.png"  width=150>
   
