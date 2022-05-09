@@ -156,6 +156,16 @@ func UpdateCodeContent(client *notionapi.Client, codeBlockID notionapi.BlockID, 
 	return client.Block.Update(context.Background(), codeBlockID, updateReq)
 }
 
+//ClearRequestCode: make the code section empty
+func ClearRequestCode(client *notionapi.Client, codeBlockID notionapi.BlockID) (notionapi.Block, error) {
+	return UpdateCodeContent(client, codeBlockID, "⌛ Waiting request...")
+}
+
+//ClearResponseCode: make the code section empty
+func ClearResponseCode(client *notionapi.Client, codeBlockID notionapi.BlockID) (notionapi.Block, error) {
+	return UpdateCodeContent(client, codeBlockID, "")
+}
+
 //GetRequestButtonsColumnBlock: retrieve buttons within request block (column list block)
 func GetRequestButtonsColumnBlock(children notionapi.Blocks) (buttonsBlock notionapi.ColumnListBlock, err error) {
 	for i := 0; i < len(children); i++ {

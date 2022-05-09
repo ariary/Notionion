@@ -50,13 +50,13 @@ func main() {
 		fmt.Println("📴 Proxy is inactive. Activate it by checking the \"OFF\" box")
 	}
 
-	forward, err := notionion.RequestForwardButtonStatus(client, pageid)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if forward {
-		fmt.Println("📨 Forward request")
-	}
+	// forward, err := notionion.RequestForwardButtonStatus(client, pageid)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// if forward {
+	// 	fmt.Println("📨 Forward request")
+	// }
 
 	// Request section checks
 	if _, err := notionion.GetRequestBlock(children); err != nil {
@@ -76,6 +76,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(92)
 	}
+	notionion.ClearRequestCode(client, codeReq.ID)
 
 	// Response section checks
 	if _, err := notionion.GetResponseBlock(children); err != nil {
@@ -92,6 +93,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(92)
 	}
+	notionion.ClearResponseCode(client, codeResp.ID)
 
 	//PROXY SECTION
 	proxy := goproxy.NewProxyHttpServer()
@@ -104,6 +106,8 @@ func main() {
 				fmt.Println(err)
 				return r, nil
 			} else if active {
+				//reset response section
+				notionion.ClearResponseCode(client, codeResp.ID)
 				// Print request on Notion proxy page
 				requestDump, err := httputil.DumpRequest(r, true)
 				if err != nil {
