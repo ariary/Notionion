@@ -11,7 +11,7 @@
 
 ---
 
-![demo](https://github.com/ariary/Notionion/blob/main/img/demo.gif)
+![demo](https://github.com/ariary/Notionion/blob/main/img/demo-fast.gif)
 
 ---
 <blockquote align=left>
