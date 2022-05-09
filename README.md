@@ -8,15 +8,15 @@
   <i>🫀Like having Burp in your notetaking app</i>
 </div>
 
+
+---
+
+![demo](https://github.com/ariary/Notionion/blob/main/img/demo.gif)
+
+---
 <blockquote align=left>
 roughly inspired by the great idea of <a href="https://github.com/mttaggart/OffensiveNotion">OffensiveNotion</a>! 
 </blockquote>
-
----
-
-... DEMO
-
----
 
 ## Quickstart
 
@@ -36,7 +36,7 @@ roughly inspired by the great idea of <a href="https://github.com/mttaggart/Offe
 
 <img src="https://github.com/ariary/Notionion/blob/main/img/proxy-page.png"  width=500>
 
-<sup><i>You can import the template [`./page.html`](https://github.com/ariary/Notionion/blob/main/page.html) using the "Import" function of Notion</i></sup>
+<sup><i>You can import the template [`./proxy.html`](https://github.com/ariary/Notionion/blob/main/proxy.html) using the "Import" function of Notion</i></sup>
 
 #### Give the permissions to `notionion` to access the Proxy page
 * Go to the [Notion API developer page](https://developers.notion.com/) and log in. Create an Integration user (`New integration`). Copy that user's API key
