@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/jomei/notionapi"
 )
@@ -12,6 +11,8 @@ import (
 const FORWARD = "FORWARD"
 const DROP = "DROP"
 const ON = "ON"
+const REQUEST = "Request"
+const RESPONSE = "Response"
 
 //RequestProxyPageChildren: Returns the children block of the Listener page
 func RequestProxyPageChildren(client *notionapi.Client, pageid string) (childrenBlocks notionapi.Blocks, err error) {
@@ -69,7 +70,7 @@ func GetResponseBlock(children notionapi.Blocks) (responseBlock notionapi.Headin
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "heading_2" {
 			headingBlock := children[i].(*notionapi.Heading2Block)
-			if strings.Contains(headingBlock.Heading2.RichText[0].Text.Content, "Response") {
+			if strings.Contains(headingBlock.Heading2.RichText[0].Text.Content, RESPONSE) {
 				return *headingBlock, nil
 			}
 		}
@@ -99,12 +100,27 @@ func GetCodeBlockByName(children notionapi.Blocks, name string) (requestCodeBloc
 
 //GetRequestCodeBlock: Obtain the code block object under the request heading
 func GetRequestCodeBlock(children notionapi.Blocks) (requestCodeBlock notionapi.CodeBlock, err error) {
-	return GetCodeBlockByName(children, "Request")
+	return GetCodeBlockByName(children, REQUEST)
+}
+
+//RequestCodeBlock: Obtain the content of code block object under the request heading
+func RequestRequestCodeContent(client *notionapi.Client, pageid string) (request string, err error) {
+
+	children, err := RequestProxyPageChildren(client, pageid)
+	if err != nil {
+		return "", err
+	}
+	codeReq, err := GetRequestCodeBlock(children)
+	if err != nil {
+		return "", err
+	}
+	request = codeReq.Code.RichText[0].PlainText
+	return request, err
 }
 
 //GetResponseCodeBlock: Obtain the code block object under the response heading
 func GetResponseCodeBlock(children notionapi.Blocks) (requestCodeBlock notionapi.CodeBlock, err error) {
-	return GetCodeBlockByName(children, "Response")
+	return GetCodeBlockByName(children, RESPONSE)
 }
 
 //UpdateCodeContent: update code block with content
@@ -210,8 +226,8 @@ func RequestDropButtonStatus(client *notionapi.Client, pageid string) (checked b
 	return drop.ToDo.Checked, err
 }
 
-//ChangeRequestButton: change request buttons appearance 
-func ChangeRequestButtons(client *notionapi.Client, pageid string,nForward notionapi.ToDoBlock,nDrop notionapi.ToDoBlock) error {
+//ChangeRequestButton: change request buttons appearance
+func ChangeRequestButtons(client *notionapi.Client, pageid string, nForward notionapi.ToDoBlock, nDrop notionapi.ToDoBlock) error {
 	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
 	if err != nil {
 		return err
@@ -240,7 +256,7 @@ func ChangeRequestButtons(client *notionapi.Client, pageid string,nForward notio
 	return err
 }
 
-//DisableRequestButtons: print request buttons as disabled 
+//DisableRequestButtons: print request buttons as disabled
 func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
 	if err != nil {
@@ -312,7 +328,7 @@ func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 	return err
 }
 
-//EnableRequestButtons: print request buttons as disabled 
+//EnableRequestButtons: print request buttons as available (uncheck them also)
 func EnableRequestButtons(client *notionapi.Client, pageid string) error {
 
 	newForward := notionapi.ToDoBlock{
@@ -325,7 +341,7 @@ func EnableRequestButtons(client *notionapi.Client, pageid string) error {
 					},
 					Annotations: &notionapi.Annotations{
 						Bold:          true,
-						Italic:        False,
+						Italic:        false,
 						Strikethrough: false,
 						Underline:     false,
 						Code:          false,
@@ -333,6 +349,7 @@ func EnableRequestButtons(client *notionapi.Client, pageid string) error {
 					},
 				},
 			},
+			Checked: false,
 		},
 	}
 
@@ -354,16 +371,9 @@ func EnableRequestButtons(client *notionapi.Client, pageid string) error {
 					},
 				},
 			},
+			Checked: false,
 		},
 	}
 
-	
-
-	return ChangeRequestButtons(client, pageid,nForward,nDrop)
-}
-
-//WaitAction: waiting for the user check neither FORWARD or DROP
-func WaitAction() string {
-	time.Sleep(3 * time.Second)
-	return FORWARD
+	return ChangeRequestButtons(client, pageid, newForward, newDrop)
 }

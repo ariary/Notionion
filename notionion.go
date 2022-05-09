@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"strings"
 
@@ -31,7 +33,7 @@ func main() {
 		fmt.Println("❌ PAGEID was not found in NOTION_PAGEURL. Ensure the url is in the form of https://notion.so/[pagename]-[pageid]")
 	}
 
-	// Check page content
+	// CHECK PAGE CONTENT
 	client := notionapi.NewClient(notionapi.Token(token))
 
 	children, err := notionion.RequestProxyPageChildren(client, pageid)
@@ -64,6 +66,9 @@ func main() {
 	} else {
 		fmt.Println("➡️ Request block found")
 	}
+	if err := notionion.DisableRequestButtons(client, pageid); err != nil {
+		fmt.Println(err)
+	}
 
 	codeReq, err := notionion.GetRequestCodeBlock(children)
 	if err != nil {
@@ -73,7 +78,6 @@ func main() {
 	}
 
 	// Response section checks
-
 	if _, err := notionion.GetResponseBlock(children); err != nil {
 		fmt.Println("❌ Response block not found in the proxy page")
 		fmt.Println(err)
@@ -82,32 +86,53 @@ func main() {
 		fmt.Println("⬅️ Response block found")
 	}
 
-	codeRes, err := notionion.GetResponseCodeBlock(children)
+	codeResp, err := notionion.GetResponseCodeBlock(children)
 	if err != nil {
 		fmt.Println("❌ Response code block not found in the proxy page")
 		fmt.Println(err)
 		os.Exit(92)
 	}
 
+	//PROXY SECTION
 	proxy := goproxy.NewProxyHttpServer()
 	//proxy.Verbose = true
 
-	// Request Handler
+	// Request HTTP Handler
 	proxy.OnRequest().DoFunc(
 		func(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-			fmt.Println("Youhou")
 			if active, err := notionion.RequestProxyStatus(client, pageid); err != nil {
 				fmt.Println(err)
 				return r, nil
 			} else if active {
 				// Print request on Notion proxy page
-				notionion.UpdateCodeContent(client, codeReq.ID, r.Host) //todo: request to string and string -> request
+				requestDump, err := httputil.DumpRequest(r, true)
+				if err != nil {
+					fmt.Println(err)
+				}
+				notionion.UpdateCodeContent(client, codeReq.ID, string(requestDump))
+				//+enable button
+				if err := notionion.EnableRequestButtons(client, pageid); err != nil {
+					fmt.Println(err)
+				}
 				//wait for action (forward or drop)
-				action := notionion.WaitAction()
-				notionion.UpdateCodeContent(client, codeRes.ID, r.Host) //todo: request to string and string -> request
+				action := notionion.WaitAction(client, pageid)
+
+				//disable button
+				if err := notionion.DisableRequestButtons(client, pageid); err != nil {
+					fmt.Println(err)
+				}
+
 				switch action {
 				case notionion.FORWARD:
 					//todo: retrieve code content -> to string
+					reqFromPage, err := notionion.RequestRequestCodeContent(client, pageid)
+					if err != nil {
+						fmt.Println("Failed to retrieve request from notion proxy page:", err)
+					}
+					reader := bufio.NewReader(strings.NewReader(reqFromPage))
+					if r, err = http.ReadRequest(reader); err != nil {
+						fmt.Println("Failed parsing request from notion proxy page:", err)
+					}
 					return r, nil
 				case notionion.DROP:
 					return nil, nil
@@ -115,29 +140,27 @@ func main() {
 			}
 			return r, nil
 		})
-	fmt.Println("🧅 Launch notionion proxy !")
+
+	// Response Handler
+	proxy.OnResponse().DoFunc(
+		func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
+			if active, err := notionion.RequestProxyStatus(client, pageid); err != nil {
+				fmt.Println(err)
+				return resp
+			} else if active {
+				// Print response on Notion proxy page
+				responseDump, err := httputil.DumpResponse(resp, true)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				// Print response in Notion proxy page
+				notionion.UpdateCodeContent(client, codeResp.ID, string(responseDump))
+			}
+			return resp
+		})
+
+	fmt.Printf("🧅 Launch notionion proxy !\n\n")
 	log.Fatal(http.ListenAndServe(":8080", proxy))
-	// //CODEBLOCK UPDATE
-	// codeRes, err := notionion.GetResponseCodeBlock(children)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// _, err = notionion.UpdateCodeContent(client, codeRes.ID, "this is a test")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	//BUTTON DISABLING
-	// _, err = notionion.GetRequestButtonsColumnBlock(children)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// if err := notionion.DisableRequestButtons(client, pageid); err != nil {
-	// 	fmt.Println(err)
-	// }
-	// button, _ := notionion.RequestRequestButtonByName(client, pageid, notionion.FORWARD)
-	// fmt.Printf("%+v", button.ToDo.RichText[0].Annotations)
 
 }
