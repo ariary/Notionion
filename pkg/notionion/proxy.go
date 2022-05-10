@@ -12,10 +12,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AdguardTeam/gomitmproxy"
 	"github.com/briandowns/spinner"
 	"github.com/elazarl/goproxy"
 	"github.com/jomei/notionapi"
 )
+
+//ProxyRequestHTTPSHandler:
+func ProxyRequestHTTPSHandler() func(session *gomitmproxy.Session) (*http.Request, *http.Response) {
+
+	return func(session *gomitmproxy.Session) (*http.Request, *http.Response) {
+		return nil, nil
+	}
+}
 
 //ProxyRequestHTTPHandler: Proxy handler sending request to notion page
 func ProxyRequestHTTPHandler(client *notionapi.Client, pageid string, codeReq notionapi.CodeBlock, codeResp notionapi.CodeBlock) (h goproxy.ReqHandler) {
@@ -129,6 +138,7 @@ func getRequestWithoutContentLength(requestDump []byte) (req string, err error) 
 	if len(hosts) > 1 { //several Host headers
 		httpHeader["Host"] = hosts[1:]
 	}
+	delete(httpHeader, "Host")
 	for h, values := range httpHeader { // append other  http header
 		for i := 0; i < len(values); i++ {
 			req += fmt.Sprintf("%s: %s\r\n", h, values[i])
@@ -186,6 +196,7 @@ func addContentLength(requestDump []byte) (req string, err error) {
 	if len(hosts) > 1 { //several Host headers
 		httpHeader["Host"] = hosts[1:]
 	}
+	delete(httpHeader, "Host")
 	for h, values := range httpHeader { // append other  http header
 		for i := 0; i < len(values); i++ {
 			req += fmt.Sprintf("%s: %s\r\n", h, values[i])
