@@ -8,10 +8,20 @@
   <i>🫀Like having Burp in your notetaking app</i>
 </div>
 
-
 ---
 
 ![demo](https://github.com/ariary/Notionion/blob/main/img/demo-fast.gif)
+
+---
+
+<div align=left>
+<h3 >Why? 🤔 </h3>
+Mainly for fun. <br> Also, to add a blade to the Swiss army knife that is notion. To quickly and easily get the content of an HTTP request or manipulate it
+</div>
+<div align=right>
+<h3 >How?  🤷‍♂️</h3>
+Just use notion as usual and launch <code>notionion</code>.
+</div>
 
 ---
 <blockquote align=left>
