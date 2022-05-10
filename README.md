@@ -16,7 +16,7 @@
 
 <div align=left>
 <h3 >Why? 🤔 </h3>
-Mainly for fun. <br> Also, to add a blade to the Swiss army knife that is notion. To quickly and easily get the content of an HTTP request or manipulate it
+Mainly for fun. <br> Also, to add a blade to the Swiss army knife that is notion. To <b>quickly and easily get the content of an HTTP request or manipulate it</b>
 </div>
 <div align=right>
 <h3 >How?  🤷‍♂️</h3>
