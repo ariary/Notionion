@@ -1,11 +1,10 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"strings"
 
@@ -15,6 +14,11 @@ import (
 )
 
 func main() {
+	port := "8080"
+	flag.Parse()
+	if len(flag.Args()) > 0 {
+		port = flag.Arg(0)
+	}
 	// integration token
 	token := os.Getenv("NOTION_TOKEN")
 	if token == "" {
@@ -49,14 +53,6 @@ func main() {
 	} else {
 		fmt.Println("📴 Proxy is inactive. Activate it by checking the \"OFF\" box")
 	}
-
-	// forward, err := notionion.RequestForwardButtonStatus(client, pageid)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// if forward {
-	// 	fmt.Println("📨 Forward request")
-	// }
 
 	// Request section checks
 	if _, err := notionion.GetRequestBlock(children); err != nil {
@@ -100,71 +96,12 @@ func main() {
 	//proxy.Verbose = true
 
 	// Request HTTP Handler
-	proxy.OnRequest().DoFunc(
-		func(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-			if active, err := notionion.RequestProxyStatus(client, pageid); err != nil {
-				fmt.Println(err)
-				return r, nil
-			} else if active {
-				//reset response section
-				notionion.ClearResponseCode(client, codeResp.ID)
-				// Print request on Notion proxy page
-				requestDump, err := httputil.DumpRequest(r, true)
-				if err != nil {
-					fmt.Println(err)
-				}
-				notionion.UpdateCodeContent(client, codeReq.ID, string(requestDump))
-				//+enable button
-				if err := notionion.EnableRequestButtons(client, pageid); err != nil {
-					fmt.Println(err)
-				}
-				//wait for action (forward or drop)
-				action := notionion.WaitAction(client, pageid)
-
-				//disable button
-				if err := notionion.DisableRequestButtons(client, pageid); err != nil {
-					fmt.Println(err)
-				}
-
-				switch action {
-				case notionion.FORWARD:
-					//todo: retrieve code content -> to string
-					reqFromPage, err := notionion.RequestRequestCodeContent(client, pageid)
-					if err != nil {
-						fmt.Println("Failed to retrieve request from notion proxy page:", err)
-					}
-					reader := bufio.NewReader(strings.NewReader(reqFromPage))
-					if r, err = http.ReadRequest(reader); err != nil {
-						fmt.Println("Failed parsing request from notion proxy page:", err)
-					}
-					return r, nil
-				case notionion.DROP:
-					return nil, nil
-				}
-			}
-			return r, nil
-		})
+	proxy.OnRequest().Do(notionion.ProxyRequestHTTPHandler(client, pageid, codeReq, codeResp))
 
 	// Response Handler
-	proxy.OnResponse().DoFunc(
-		func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
-			if active, err := notionion.RequestProxyStatus(client, pageid); err != nil {
-				fmt.Println(err)
-				return resp
-			} else if active {
-				// Print response on Notion proxy page
-				responseDump, err := httputil.DumpResponse(resp, true)
-				if err != nil {
-					fmt.Println(err)
-				}
+	proxy.OnResponse().Do(notionion.ProxyResponseHTTPHandler(client, pageid, codeResp))
 
-				// Print response in Notion proxy page
-				notionion.UpdateCodeContent(client, codeResp.ID, string(responseDump))
-			}
-			return resp
-		})
-
-	fmt.Printf("🧅 Launch notionion proxy !\n\n")
-	log.Fatal(http.ListenAndServe(":8080", proxy))
+	fmt.Printf("🧅 Launch notionion proxy on port %s !\n\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, proxy))
 
 }
