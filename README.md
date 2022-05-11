@@ -65,6 +65,7 @@ source env.sh
 ### 👟 Run
 
 ```shell
+source env.sh #load environment variables
 notionion
 ```
 

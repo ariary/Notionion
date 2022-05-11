@@ -37,19 +37,23 @@ func ProxyRequestHTTPHandler(client *notionapi.Client, pageid string, codeReq no
 			//reset response section
 			ClearResponseCode(client, codeResp.ID)
 			// Print request on Notion proxy page
-			r.Header.Del("Content-Lenght")
+			r.Header.Del("Content-Length")
 			requestDump, err := httputil.DumpRequest(r, true) //Use dumprequestOut to have the full request + use string(requestDump)
 			if err != nil {
 				fmt.Println(err)
 			}
-			if req, err := getRequestWithoutContentLength(requestDump); err != nil {
-				fmt.Println(err)
-				return r, nil
-			} else {
-				UpdateCodeContent(client, codeReq.ID, req)
-			}
+			// requestDump, err := httputil.DumpRequest(r, true) //Use dumprequestOut to have the full request + use string(requestDump)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
+			// if req, err := getRequestWithoutContentLength(requestDump); err != nil {
+			// 	fmt.Println(err)
+			// 	return r, nil
+			// } else {
+			// 	UpdateCodeContent(client, codeReq.ID, req)
+			// }
 
-			//UpdateCodeContent(client, codeReq.ID, string(requestDump))
+			UpdateCodeContent(client, codeReq.ID, string(requestDump))
 			//+enable button
 			if err := EnableRequestButtons(client, pageid); err != nil {
 				fmt.Println(err)
@@ -69,7 +73,7 @@ func ProxyRequestHTTPHandler(client *notionapi.Client, pageid string, codeReq no
 				if err != nil {
 					fmt.Println("Failed to retrieve request from notion proxy page:", err)
 				}
-				reqFromPage, err = addContentLength([]byte(reqFromPage)) //comment it, if you don't use getRequestWithoutContentLength
+				reqFromPage, err = addContentLength([]byte(reqFromPage)) //comment it, if you don't use getRequestWithoutContentLength or delete Content-Length header
 				if err != nil {
 					fmt.Println(err)
 				}
