@@ -16,13 +16,12 @@
 
 <div align=left>
 <h3 >Why? 🤔 </h3>
-Mainly for fun. <br> Also, to add a blade to the Swiss army knife that is notion. To <b>take advantage of the Notion benefits</b>
+Mainly for fun of adding a blade to the Swiss army knife that is notion. <br>The purpose is to provide an HTTP proxy which <b>takes advantage of the Notion benefits</b>
 <ul>
-<il>Cross-platform (proxy on Windows/MacOS, browsers, mobile)</il>
-<il>Shared with authentication</il>
-<il>Accomplished notetaking app (GUI provided, ease HTTP packet manipulation, add notes)</il>
+<li>Cross-platform (Windows/MacOS, browsers, mobile)</li>
+<li>Shared with authentication</li>
+<li>Accomplished notetaking app (GUI provided, ease HTTP packet manipulation, add notes)</li>
 </ul>
-
 </div>
 <div align=right>
 <h3 >How?  🤷‍♂️</h3>
