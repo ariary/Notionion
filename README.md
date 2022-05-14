@@ -16,7 +16,13 @@
 
 <div align=left>
 <h3 >Why? 🤔 </h3>
-Mainly for fun. <br> Also, to add a blade to the Swiss army knife that is notion. To <b>quickly and easily get the content of an HTTP request or manipulate it</b>
+Mainly for fun. <br> Also, to add a blade to the Swiss army knife that is notion. To <b>take advantage of the Notion benefits</b>
+<ul>
+<il>Cross-platform (proxy on Windows/MacOS, browsers, mobile)</il>
+<il>Shared with authentication</il>
+<il>Accomplished notetaking app (GUI provided, ease HTTP packet manipulation, add notes)</il>
+</ul>
+
 </div>
 <div align=right>
 <h3 >How?  🤷‍♂️</h3>
