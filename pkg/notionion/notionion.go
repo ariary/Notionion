@@ -14,13 +14,13 @@ const ON = "ON"
 const REQUEST = "Request"
 const RESPONSE = "Response"
 
-//RequestProxyPageChildren: Returns the children block of the Listener page
+// RequestProxyPageChildren: Returns the children block of the Listener page
 func RequestProxyPageChildren(client *notionapi.Client, pageid string) (childrenBlocks notionapi.Blocks, err error) {
 	children, err := client.Block.GetChildren(context.Background(), notionapi.BlockID(pageid), nil)
 	return children.Results, err
 }
 
-//RequestProxyStatus: request notion api to determine if proxy is active
+// RequestProxyStatus: request notion api to determine if proxy is active
 func RequestProxyStatus(client *notionapi.Client, pageid string) (active bool, err error) {
 	children, err := RequestProxyPageChildren(client, pageid)
 	if err != nil {
@@ -37,7 +37,7 @@ func RequestProxyStatus(client *notionapi.Client, pageid string) (active bool, e
 	return false, nil
 }
 
-//GetProxyStatus: get proxy status from page's blocks
+// GetProxyStatus: get proxy status from page's blocks
 func GetProxyStatus(children notionapi.Blocks) (bool, error) {
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "to_do" {
@@ -51,7 +51,7 @@ func GetProxyStatus(children notionapi.Blocks) (bool, error) {
 	return false, err
 }
 
-//GetRequestBlock: retrieve "Request" block from page's blocks
+// GetRequestBlock: retrieve "Request" block from page's blocks
 func GetRequestBlock(children notionapi.Blocks) (requestBlock notionapi.Heading2Block, err error) {
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "heading_2" {
@@ -65,7 +65,7 @@ func GetRequestBlock(children notionapi.Blocks) (requestBlock notionapi.Heading2
 	return requestBlock, err
 }
 
-//GetResponseBlock: retrieve "Response" block from page's blocks
+// GetResponseBlock: retrieve "Response" block from page's blocks
 func GetResponseBlock(children notionapi.Blocks) (responseBlock notionapi.Heading2Block, err error) {
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "heading_2" {
@@ -79,7 +79,7 @@ func GetResponseBlock(children notionapi.Blocks) (responseBlock notionapi.Headin
 	return responseBlock, err
 }
 
-//GetCodeBlockByName: Obtain the code block object under the section specified by name (name={"Request","Response"})
+// GetCodeBlockByName: Obtain the code block object under the section specified by name (name={"Request","Response"})
 func GetCodeBlockByName(children notionapi.Blocks, name string) (requestCodeBlock notionapi.CodeBlock, err error) {
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "code" {
@@ -98,12 +98,12 @@ func GetCodeBlockByName(children notionapi.Blocks, name string) (requestCodeBloc
 	return requestCodeBlock, err
 }
 
-//GetRequestCodeBlock: Obtain the code block object under the request heading
+// GetRequestCodeBlock: Obtain the code block object under the request heading
 func GetRequestCodeBlock(children notionapi.Blocks) (requestCodeBlock notionapi.CodeBlock, err error) {
 	return GetCodeBlockByName(children, REQUEST)
 }
 
-//RequestCodeBlock: Obtain the content of code block object under the request heading
+// RequestCodeBlock: Obtain the content of code block object under the request heading
 func RequestRequestCodeContent(client *notionapi.Client, pageid string) (request string, err error) {
 
 	children, err := RequestProxyPageChildren(client, pageid)
@@ -118,12 +118,12 @@ func RequestRequestCodeContent(client *notionapi.Client, pageid string) (request
 	return request, err
 }
 
-//GetResponseCodeBlock: Obtain the code block object under the response heading
+// GetResponseCodeBlock: Obtain the code block object under the response heading
 func GetResponseCodeBlock(children notionapi.Blocks) (requestCodeBlock notionapi.CodeBlock, err error) {
 	return GetCodeBlockByName(children, RESPONSE)
 }
 
-//UpdateCodeContent: update code block with content
+// UpdateCodeContent: update code block with content
 func UpdateCodeContent(client *notionapi.Client, codeBlockID notionapi.BlockID, content string) (notionapi.Block, error) {
 	//construct code block containing request
 	code := notionapi.CodeBlock{
@@ -131,7 +131,7 @@ func UpdateCodeContent(client *notionapi.Client, codeBlockID notionapi.BlockID, 
 			RichText: []notionapi.RichText{
 				{
 					Type: notionapi.ObjectTypeText,
-					Text: notionapi.Text{
+					Text: &notionapi.Text{
 						Content: content,
 					},
 					Annotations: &notionapi.Annotations{
@@ -156,17 +156,17 @@ func UpdateCodeContent(client *notionapi.Client, codeBlockID notionapi.BlockID, 
 	return client.Block.Update(context.Background(), codeBlockID, updateReq)
 }
 
-//ClearRequestCode: make the code section empty
+// ClearRequestCode: make the code section empty
 func ClearRequestCode(client *notionapi.Client, codeBlockID notionapi.BlockID) (notionapi.Block, error) {
 	return UpdateCodeContent(client, codeBlockID, "⌛ Waiting request...")
 }
 
-//ClearResponseCode: make the code section empty
+// ClearResponseCode: make the code section empty
 func ClearResponseCode(client *notionapi.Client, codeBlockID notionapi.BlockID) (notionapi.Block, error) {
 	return UpdateCodeContent(client, codeBlockID, "")
 }
 
-//GetRequestButtonsColumnBlock: retrieve buttons within request block (column list block)
+// GetRequestButtonsColumnBlock: retrieve buttons within request block (column list block)
 func GetRequestButtonsColumnBlock(children notionapi.Blocks) (buttonsBlock notionapi.ColumnListBlock, err error) {
 	for i := 0; i < len(children); i++ {
 		if children[i].GetType() == "column_list" {
@@ -180,7 +180,7 @@ func GetRequestButtonsColumnBlock(children notionapi.Blocks) (buttonsBlock notio
 	return buttonsBlock, err
 }
 
-//RequestRequestButtonByName:return specific to_do block within "request" block is checked.
+// RequestRequestButtonByName:return specific to_do block within "request" block is checked.
 // name: {"FORWARD", "DROP"}
 func RequestRequestButtonByName(client *notionapi.Client, pageid string, name string) (button notionapi.ToDoBlock, err error) {
 	children, err := RequestProxyPageChildren(client, pageid)
@@ -216,7 +216,7 @@ func RequestRequestButtonByName(client *notionapi.Client, pageid string, name st
 	return button, err
 }
 
-//RequestForwardButtonStatus: check if forward button is checked
+// RequestForwardButtonStatus: check if forward button is checked
 func RequestForwardButtonStatus(client *notionapi.Client, pageid string) (checked bool, err error) {
 	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
 	if err != nil {
@@ -226,7 +226,7 @@ func RequestForwardButtonStatus(client *notionapi.Client, pageid string) (checke
 	return forward.ToDo.Checked, err
 }
 
-//RequestDropButtonStatus: check if drop button is checked
+// RequestDropButtonStatus: check if drop button is checked
 func RequestDropButtonStatus(client *notionapi.Client, pageid string) (checked bool, err error) {
 	drop, err := RequestRequestButtonByName(client, pageid, DROP)
 	if err != nil {
@@ -236,7 +236,7 @@ func RequestDropButtonStatus(client *notionapi.Client, pageid string) (checked b
 	return drop.ToDo.Checked, err
 }
 
-//ChangeRequestButton: change request buttons appearance
+// ChangeRequestButton: change request buttons appearance
 func ChangeRequestButtons(client *notionapi.Client, pageid string, nForward notionapi.ToDoBlock, nDrop notionapi.ToDoBlock) error {
 	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
 	if err != nil {
@@ -266,7 +266,7 @@ func ChangeRequestButtons(client *notionapi.Client, pageid string, nForward noti
 	return err
 }
 
-//DisableRequestButtons: print request buttons as disabled
+// DisableRequestButtons: print request buttons as disabled
 func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 	forward, err := RequestRequestButtonByName(client, pageid, FORWARD)
 	if err != nil {
@@ -283,7 +283,7 @@ func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 			RichText: []notionapi.RichText{
 				{
 					Type: notionapi.ObjectTypeText,
-					Text: notionapi.Text{
+					Text: &notionapi.Text{
 						Content: FORWARD,
 					},
 					Annotations: &notionapi.Annotations{
@@ -304,7 +304,7 @@ func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 			RichText: []notionapi.RichText{
 				{
 					Type: notionapi.ObjectTypeText,
-					Text: notionapi.Text{
+					Text: &notionapi.Text{
 						Content: DROP,
 					},
 					Annotations: &notionapi.Annotations{
@@ -338,7 +338,7 @@ func DisableRequestButtons(client *notionapi.Client, pageid string) error {
 	return err
 }
 
-//EnableRequestButtons: print request buttons as available (uncheck them also)
+// EnableRequestButtons: print request buttons as available (uncheck them also)
 func EnableRequestButtons(client *notionapi.Client, pageid string) error {
 
 	newForward := notionapi.ToDoBlock{
@@ -346,7 +346,7 @@ func EnableRequestButtons(client *notionapi.Client, pageid string) error {
 			RichText: []notionapi.RichText{
 				{
 					Type: notionapi.ObjectTypeText,
-					Text: notionapi.Text{
+					Text: &notionapi.Text{
 						Content: FORWARD,
 					},
 					Annotations: &notionapi.Annotations{
@@ -368,7 +368,7 @@ func EnableRequestButtons(client *notionapi.Client, pageid string) error {
 			RichText: []notionapi.RichText{
 				{
 					Type: notionapi.ObjectTypeText,
-					Text: notionapi.Text{
+					Text: &notionapi.Text{
 						Content: DROP,
 					},
 					Annotations: &notionapi.Annotations{
